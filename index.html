@@ -349,10 +349,11 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
 }
 
 /* ══ RESPONSIVE — MOBILE ══ */
-@media(max-width:600px){
-  #mob-menu-btn{display:flex;}
-  .nav-tabs{display:none;}
-  .nav-end{display:none;}
+@media(max-width:768px){
+  #mob-menu-btn{display:flex !important;}
+  #mob-file-label{display:flex !important;}
+  .nav-tabs{display:none !important;}
+  .nav-end{display:none !important;}
   :root{--nav-h:44px;}
   html{font-size:14px;}
   nav{flex-wrap:nowrap;}
@@ -381,7 +382,198 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
   #statusbar{gap:.8rem;padding:0 .6rem;font-size:.57rem;}
   #statusbar .sb-right{gap:.8rem;}
   #statusbar .sb-item:nth-child(3){display:none;}
+  #mob-drawer{display:block !important;}
+  #term-btn{bottom:34px;right:14px;width:42px;height:42px;}
 }
+@media(min-width:769px){
+  #mob-menu-btn{display:none !important;}
+  #mob-drawer{display:none !important;}
+}
+
+/* ══════════════════════════════════════════
+   ✨ PREMIUM AESTHETICS
+══════════════════════════════════════════ */
+
+/* Hero — dot grid background */
+#hero{
+  background-image: radial-gradient(circle, rgba(59,118,240,0.07) 1px, transparent 1px) !important;
+  background-size: 28px 28px;
+  background-color: var(--surface) !important;
+}
+
+/* Hero class name — gradient text */
+.fn.grad{
+  background: linear-gradient(135deg, #3B76F0 0%, #7B4FE9 60%, #0178B3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glowing blink cursor */
+.blink-cur{
+  box-shadow: 0 0 12px rgba(59,118,240,0.9), 0 0 24px rgba(59,118,240,0.4) !important;
+}
+
+/* Gutter active line glow */
+.ln.glow{
+  color: var(--blue) !important;
+  text-shadow: 0 0 12px rgba(59,118,240,0.8);
+}
+
+/* Research cards — glass on hover */
+.r-card:hover{
+  background: linear-gradient(145deg,rgba(255,255,255,0.95),rgba(250,250,250,0.9)) !important;
+  box-shadow: 0 8px 32px rgba(59,118,240,0.12), inset 0 0 0 1px var(--bord-blu) !important;
+}
+.r-card::before{
+  background: linear-gradient(90deg, #3B76F0, #7B4FE9, #7aafff) !important;
+  height: 3px !important;
+}
+
+/* Skill bars — shimmer gradient */
+.sk-fill{
+  background: linear-gradient(90deg,#3B76F0 0%,#7B4FE9 50%,#7aafff 100%) !important;
+}
+.sk-fill.go{
+  animation: shimmer 3.5s linear infinite;
+}
+@keyframes shimmer{
+  0%{background-position:200% 0}100%{background-position:-200% 0}
+}
+.sk-fill{background-size:200% 100% !important;}
+
+/* Publication left border — gradient */
+.pub-item::before{
+  background: linear-gradient(180deg, #3B76F0, #7B4FE9) !important;
+}
+
+/* Projects — gradient top reveal on hover */
+.prj-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+  background: linear-gradient(90deg,#3B76F0,#7B4FE9,#7aafff);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s cubic-bezier(.16,1,.3,1);
+  z-index:1;
+}
+.prj-card:hover::before{transform:scaleX(1);}
+.prj-card{position:relative;}
+
+/* obj-block — blue left glow on hover */
+.obj-block:hover{
+  box-shadow: -3px 0 0 var(--blue), var(--sh-md) !important;
+  border-left-color: var(--blue) !important;
+}
+
+/* docstring — green glow */
+.docstring:hover{
+  box-shadow: -3px 0 0 var(--t-str), 0 4px 20px rgba(68,162,62,0.15) !important;
+}
+
+/* Experience open — blue accent bar */
+.exp-blk.open{
+  border-left: 3px solid var(--blue) !important;
+  box-shadow: -4px 0 16px rgba(59,118,240,0.1) !important;
+}
+
+/* Stats cards — glow on hover */
+.os:hover{
+  box-shadow: 0 4px 24px rgba(59,118,240,0.18) !important;
+  border-color: rgba(59,118,240,0.4) !important;
+}
+.os-n em{text-shadow: 0 0 14px rgba(59,118,240,0.5);}
+
+/* Achievements — gradient hover */
+.ach-item{border-left:3px solid transparent;transition:all .2s;}
+.ach-item:hover{
+  background: linear-gradient(90deg,rgba(59,118,240,0.05),transparent 70%) !important;
+  border-left-color: var(--blue);
+}
+
+/* Section alt — dot pattern */
+.sf.alt{
+  background-image: radial-gradient(circle,rgba(59,118,240,0.025) 1px,transparent 1px) !important;
+  background-size: 24px 24px;
+  background-color: var(--bg) !important;
+}
+
+/* Section tab — gradient bg */
+.stb-tab{
+  background: linear-gradient(135deg,#fff 0%,rgba(59,118,240,0.05) 100%) !important;
+}
+
+/* Nav active — gradient */
+.tab.active{
+  background: linear-gradient(180deg,#fff 0%,rgba(59,118,240,0.04) 100%) !important;
+}
+
+/* Boot bar — gradient + glow */
+.boot-bar-fill{
+  background: linear-gradient(90deg,#3B76F0,#7B4FE9,#7aafff) !important;
+  box-shadow: 0 0 12px rgba(59,118,240,0.6);
+}
+.boot-logo-box{
+  background: linear-gradient(135deg,#3B76F0,#7B4FE9) !important;
+  box-shadow: 0 4px 20px rgba(59,118,240,0.4);
+}
+
+/* Terminal button — gradient pulse */
+#term-btn{
+  background: linear-gradient(135deg,#3B76F0,#7B4FE9) !important;
+  animation: ring-pulse 3s ease-in-out infinite !important;
+  box-shadow: 0 4px 20px rgba(59,118,240,0.45) !important;
+}
+@keyframes ring-pulse{
+  0%,100%{box-shadow:0 4px 20px rgba(59,118,240,0.4),0 0 0 0 rgba(123,79,233,0.3)}
+  50%{box-shadow:0 4px 28px rgba(59,118,240,0.55),0 0 0 8px rgba(123,79,233,0)}
+}
+
+/* Status bar — gradient */
+#statusbar{
+  background: linear-gradient(90deg,#2555c4,#3B76F0,#5a8ef7) !important;
+}
+
+/* Scroll progress — gradient + glow */
+#scroll-prog{
+  background: linear-gradient(90deg,#3B76F0,#7B4FE9,#7aafff) !important;
+  box-shadow: 0 0 8px rgba(123,79,233,0.6) !important;
+}
+
+/* CTA button — gradient */
+.nav-cta{
+  background: linear-gradient(135deg,#3B76F0,#7B4FE9) !important;
+  box-shadow: 0 2px 12px rgba(59,118,240,0.35) !important;
+}
+.nav-cta:hover{
+  background: linear-gradient(135deg,#2962d8,#6a3dd4) !important;
+  box-shadow: 0 4px 20px rgba(59,118,240,0.5) !important;
+}
+
+/* Submit button — gradient */
+.fb-submit{
+  background: linear-gradient(135deg,#3B76F0,#7B4FE9) !important;
+  box-shadow: 0 3px 14px rgba(59,118,240,0.35) !important;
+}
+.fb-submit:hover{
+  background: linear-gradient(135deg,#2962d8,#6a3dd4) !important;
+  box-shadow: 0 6px 24px rgba(59,118,240,0.5) !important;
+}
+
+/* Mobile drawer — premium style */
+.mob-nav-link:hover, .mob-nav-link.active{
+  background: linear-gradient(90deg,rgba(59,118,240,0.08),transparent) !important;
+  border-left: 3px solid var(--blue);
+  padding-left: calc(1.4rem - 3px);
+}
+.mob-nav-link{border-left:3px solid transparent;transition:all .2s;}
+
+/* Hero right panel — glass tint */
+.hero-right{
+  background: linear-gradient(145deg, rgba(250,250,246,0.95), rgba(237,237,231,0.9)) !important;
+}
+
+/* rc-ico size boost on hover */
+.r-card:hover .rc-ico{transform:scale(1.08);transition:transform .25s;}
+.rc-ico{transition:transform .25s;}
 
 /* ══════════════════════════════════════
    🚀 BOOT COMPILE SCREEN
@@ -492,8 +684,9 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
 ══════════════════════════════════════ */
 #mob-menu-btn{
   display:none;align-items:center;justify-content:center;
-  width:38px;height:38px;background:transparent;border:1px solid var(--border);
-  cursor:pointer;flex-shrink:0;border-radius:2px;margin-right:.5rem;
+  width:38px;height:28px;background:transparent;border:none;
+  cursor:pointer;flex-shrink:0;padding:0;margin-right:.6rem;
+  outline:none;-webkit-tap-highlight-color:transparent;
 }
 #mob-menu-btn span{display:block;width:16px;height:1.5px;background:var(--ink-lt);
   transition:all .25s;position:relative;}
@@ -508,26 +701,49 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
 
 #mob-drawer{
   position:fixed;top:var(--nav-h);left:0;right:0;z-index:190;
-  background:var(--surface);border-bottom:1px solid var(--bord-md);
-  box-shadow:0 8px 30px rgba(0,0,0,0.1);
+  background:var(--surface);
+  border-bottom:2px solid rgba(59,118,240,0.2);
+  box-shadow:0 12px 48px rgba(0,0,0,0.13), 0 4px 16px rgba(59,118,240,0.06);
   transform:translateY(-110%);opacity:0;
-  transition:transform .3s cubic-bezier(.16,1,.3,1),opacity .3s;
+  transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s;
   pointer-events:none;
 }
 #mob-drawer.open{transform:translateY(0);opacity:1;pointer-events:all;}
-.mob-nav-links{display:flex;flex-direction:column;padding:.5rem 0;}
+.mob-nav-links{display:flex;flex-direction:column;padding:.4rem 0;}
 .mob-nav-link{
-  display:flex;align-items:center;gap:.75rem;padding:.9rem 1.4rem;
+  display:flex;align-items:center;gap:.75rem;padding:.95rem 1.4rem;
   font-family:var(--mono);font-size:.78rem;color:var(--ink-lt);
   text-decoration:none;border-bottom:1px solid var(--border);
-  transition:background .15s,color .15s;
+  transition:all .2s;border-left:3px solid transparent;
 }
 .mob-nav-link:last-child{border-bottom:none;}
-.mob-nav-link:hover,.mob-nav-link.active{background:var(--blue-lt);color:var(--ink);}
+.mob-nav-link:hover,.mob-nav-link.active{
+  background:linear-gradient(90deg,rgba(59,118,240,0.07),transparent);
+  color:var(--ink);border-left-color:var(--blue);
+  padding-left:calc(1.4rem - 3px);
+}
 .mob-nav-link .td{flex-shrink:0;}
-.mob-nav-link .mk{margin-left:auto;font-size:.62rem;color:var(--ln);}
+.mob-nav-link .mk{margin-left:auto;font-size:.6rem;color:var(--ln);letter-spacing:.05em;}
+/* Stagger animation for drawer items */
+#mob-drawer.open .mob-nav-link{
+  animation:slide-in .3s ease forwards;
+  opacity:0;
+}
+#mob-drawer.open .mob-nav-link:nth-child(1){animation-delay:.04s}
+#mob-drawer.open .mob-nav-link:nth-child(2){animation-delay:.08s}
+#mob-drawer.open .mob-nav-link:nth-child(3){animation-delay:.12s}
+#mob-drawer.open .mob-nav-link:nth-child(4){animation-delay:.16s}
+#mob-drawer.open .mob-nav-link:nth-child(5){animation-delay:.20s}
+#mob-drawer.open .mob-nav-link:nth-child(6){animation-delay:.24s}
+#mob-drawer.open .mob-nav-link:nth-child(7){animation-delay:.28s}
+@keyframes slide-in{
+  from{opacity:0;transform:translateX(-10px)}
+  to{opacity:1;transform:translateX(0)}
+}
 .mob-overlay{
-  position:fixed;inset:0;z-index:189;background:rgba(0,0,0,0.2);
+  position:fixed;inset:0;z-index:189;
+  background:rgba(0,0,0,0.25);
+  backdrop-filter:blur(2px);
   opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .mob-overlay.open{opacity:1;pointer-events:all;}
@@ -644,14 +860,19 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
 <nav id="nav">
   <div class="nav-brand">
     <svg class="nb-icon" viewBox="0 0 18 18" fill="none">
-      <rect x=".5" y=".5" width="17" height="17" stroke="#3B76F0" stroke-width="1"/>
-      <text x="9" y="13" font-family="Fira Code,monospace" font-size="8.5" font-weight="700" fill="#3B76F0" text-anchor="middle">ir</text>
+      <defs><linearGradient id="nav-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B76F0"/><stop offset="100%" stop-color="#7B4FE9"/></linearGradient></defs>
+      <rect x=".5" y=".5" width="17" height="17" stroke="url(#nav-grad)" stroke-width="1.2"/>
+      <text x="9" y="13" font-family="Fira Code,monospace" font-size="8.5" font-weight="700" fill="url(#nav-grad)" text-anchor="middle">ir</text>
     </svg>
     <span class="nb-label">EXPLORER</span>
   </div>
   <button id="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">
     <span></span>
   </button>
+  <!-- mobile "currently reading" label -->
+  <div id="mob-file-label" style="font-family:var(--mono);font-size:.65rem;color:var(--ink-lt);display:none;align-items:center;gap:.4rem;flex:1;padding-left:.2rem;">
+    <div class="td py" style="flex-shrink:0"></div><span id="mob-file-name">imandi_raju.py</span>
+  </div>
   <div class="nav-tabs">
     <a class="tab active" href="#hero"><div class="td py"></div>imandi_raju.py</a>
     <a class="tab" href="#research"><div class="td ts"></div>research.ts</a>
@@ -679,7 +900,7 @@ footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
         <span class="code-line"><span class="kw">from</span> <span class="fn">akash_labs</span> <span class="kw">import</span> <span class="typ">AerialIntelligence</span></span>
         <span class="code-line"><span class="kw">from</span> <span class="fn">srm_ap.cse</span> <span class="kw">import</span> <span class="typ">Professor</span><span class="pun">,</span> <span class="typ">Researcher</span></span>
         <span class="code-line">&nbsp;</span>
-        <span class="code-line"><span class="kw">class</span> <span class="fn">ImandiRaju</span><span class="pun">(</span><span class="typ">Professor</span><span class="pun">,</span> <span class="typ">Researcher</span><span class="pun">):</span></span>
+        <span class="code-line"><span class="kw">class</span> <span class="fn grad">ImandiRaju</span><span class="pun">(</span><span class="typ">Professor</span><span class="pun">,</span> <span class="typ">Researcher</span><span class="pun">):</span></span>
         <span class="code-line">&nbsp;</span>
         <span class="code-line i1"><span class="str">"""</span></span>
         <span class="code-line i1"><span class="str">Assistant Professor, Dept. of CSE — SRM University-AP</span></span>
@@ -1300,15 +1521,29 @@ function closeMobMenu(){
 const tabMap={hero:'imandi_raju.py',about:'imandi_raju.py',research:'research.ts',
   skills:'skills.py',experience:'experience.py',education:'education.yml',
   publications:'publications.md',achievements:'achievements.py',contact:'contact.ts'};
+const fileColors={
+  'imandi_raju.py':'py','research.ts':'ts','skills.py':'py',
+  'experience.py':'py','education.yml':'yml','publications.md':'md',
+  'achievements.py':'py','contact.ts':'ts'
+};
 const tabs=document.querySelectorAll('.tab');
+const mobFileName=document.getElementById('mob-file-name');
+const mobFileDot=document.querySelector('#mob-file-label .td');
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
-      const f=tabMap[e.target.id]||'';
+      const f=tabMap[e.target.id]||'imandi_raju.py';
       tabs.forEach(t=>{t.classList.toggle('active',t.textContent.trim()===f);});
       document.querySelectorAll('.mob-nav-link').forEach(ml=>{
         ml.classList.toggle('active', ml.getAttribute('href')==='#'+e.target.id);
       });
+      // Update mobile label
+      if(mobFileName){
+        mobFileName.textContent=f;
+        if(mobFileDot){
+          mobFileDot.className='td '+(fileColors[f]||'py');
+        }
+      }
       const activeTab=document.querySelector('.tab.active');
       if(activeTab)activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     }
