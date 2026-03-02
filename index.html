@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>imandi_raju.py — Assistant Professor, CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F5F5EF;
+  --surface:  #FEFEFE;
+  --surface2: #FAFAF6;
+  --gutter:   #EDEDЕ7;
+  --gutter2:  #E6E6E0;
+  --border:   rgba(0,0,0,0.065);
+  --bord-md:  rgba(0,0,0,0.11);
+  --bord-blu: rgba(64,120,242,0.18);
+
+  /* Syntax tokens — One Light (slightly richer) */
+  --t-kw:   #9B1EA8;
+  --t-fn:   #3B76F0;
+  --t-str:  #44A23E;
+  --t-num:  #9B6700;
+  --t-cmt:  #9EA1A8;
+  --t-type: #B87D00;
+  --t-op:   #0178B3;
+  --t-var:  #D94A3E;
+
+  --ink:    #353740;
+  --ink-lt: #60636D;
+  --ink-dm: #9EA1A8;
+  --ln:     #C8C8C4;
+
+  --blue:   #3B76F0;
+  --blue-lt: rgba(59,118,240,0.07);
+  --str-lt:  rgba(68,162,62,0.07);
+  --mono:   'Fira Code','Courier New',monospace;
+  --sans:   'DM Sans',sans-serif;
+
+  --sh-sm:  0 1px 6px rgba(0,0,0,0.05), 0 2px 14px rgba(0,0,0,0.04);
+  --sh-md:  0 4px 24px rgba(0,0,0,0.08), 0 1px 6px rgba(0,0,0,0.04);
+  --sh-blu: 0 0 0 3px rgba(59,118,240,0.12);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:15px;}
+body{background:var(--bg);color:var(--ink);font-family:var(--mono);overflow-x:hidden;cursor:none;}
+
+/* subtle paper grain */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.006) 3px,rgba(0,0,0,.006) 4px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E");
+}
+
+/* ══ CURSOR — blinking text bar with glow ══ */
+#cur{position:fixed;width:2px;height:22px;background:var(--blue);pointer-events:none;
+  z-index:9999;transform:translate(0,-50%);border-radius:1px;
+  animation:blink 1.1s step-end infinite;
+  box-shadow:0 0 8px rgba(59,118,240,0.5);}
+#cur-gt{position:fixed;font-family:var(--mono);font-size:.68rem;color:var(--t-fn);
+  pointer-events:none;z-index:9998;transform:translate(-20px,-50%);opacity:.45;user-select:none;
+  transition:left .07s,top .07s;}
+@keyframes blink{0%,45%{opacity:1}55%,100%{opacity:0}}
+
+/* ══ FILE-TAB NAV ══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--gutter2);
+  border-bottom:1px solid var(--bord-md);display:flex;align-items:stretch;height:46px;
+  box-shadow:0 1px 8px rgba(0,0,0,0.06);}
+.nav-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.4rem;
+  border-right:1px solid var(--bord-md);flex-shrink:0;
+  background:linear-gradient(to bottom,var(--surface2),var(--gutter2));}
+.nb-icon{width:20px;height:20px;}
+.nb-label{font-size:.68rem;font-weight:700;color:var(--ink-lt);letter-spacing:.07em;text-transform:uppercase;}
+.nav-tabs{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab{display:flex;align-items:center;gap:.5rem;padding:0 1.2rem;font-size:.7rem;color:var(--ink-dm);
+  border-right:1px solid var(--border);cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background .15s,color .15s;border-bottom:2px solid transparent;letter-spacing:.01em;}
+.tab:hover{background:rgba(0,0,0,.025);color:var(--ink-lt);}
+.tab.active{background:var(--surface);color:var(--ink);border-bottom-color:var(--blue);
+  box-shadow:inset 0 1px 0 var(--surface);}
+.td{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.td.py{background:#3572A5}.td.md{background:#083fa1}.td.ts{background:#2b7489}.td.yml{background:#cb171e}
+.nav-end{margin-left:auto;display:flex;align-items:center;padding:0 1.3rem;border-left:1px solid var(--bord-md);flex-shrink:0;}
+.nav-cta{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;
+  color:var(--surface);background:var(--blue);border:none;padding:.42rem 1.2rem;
+  text-decoration:none;cursor:pointer;transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
+  box-shadow:0 2px 10px rgba(59,118,240,0.28);}
+.nav-cta:hover{background:#2962d8;box-shadow:0 4px 16px rgba(59,118,240,0.4);}
+
+/* ══ CODE UTILITIES ══ */
+.kw  {color:var(--t-kw);font-weight:600}
+.fn  {color:var(--t-fn)}
+.str {color:var(--t-str)}
+.num {color:var(--t-num)}
+.cmt {color:var(--t-cmt);font-style:italic}
+.typ {color:var(--t-type);font-weight:500}
+.op  {color:var(--t-op)}
+.vr  {color:var(--t-var)}
+.pun {color:var(--ink-lt)}
+
+.code-line{font-size:.875rem;line-height:2.15;white-space:pre;display:block;
+  position:relative;transition:background .15s;}
+.code-line:hover{background:rgba(59,118,240,0.04);}
+.code-line.hl-line{background:rgba(59,118,240,0.07);}
+.code-line.hl-line::before{content:'';position:absolute;left:-58px;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0;}
+.i1{padding-left:1.6em}.i2{padding-left:3.2em}.i3{padding-left:4.8em}
+
+/* blinking cursor inside text */
+.blink-cur{display:inline-block;width:2px;height:.88em;background:var(--blue);
+  vertical-align:middle;margin-left:2px;border-radius:1px;animation:blink 1.1s step-end infinite;
+  box-shadow:0 0 6px rgba(59,118,240,0.5);}
+
+/* ══ HERO ══ */
+#hero{padding-top:46px;background:var(--surface);border-bottom:1px solid var(--bord-md);}
+.hero-split{display:grid;grid-template-columns:1fr 420px;min-height:calc(100vh - 46px);}
+.hero-left{padding:4rem 3.5rem 4.5rem 4.8rem;position:relative;display:flex;flex-direction:column;justify-content:center;}
+/* gutter strip */
+.hero-gutter{position:absolute;left:0;top:0;bottom:0;width:58px;
+  background:linear-gradient(to right,var(--bg),var(--gutter));
+  border-right:1px solid var(--border);display:flex;flex-direction:column;padding-top:1rem;z-index:2;}
+.ln{font-size:.6rem;color:var(--ln);line-height:2.15;text-align:right;padding-right:12px;
+  font-variant-numeric:tabular-nums;flex-shrink:0;}
+.ln.active-ln{color:var(--ink-lt);font-weight:600;}
+
+/* hero right — output panel */
+.hero-right{background:var(--surface2);border-left:1px solid var(--bord-md);display:flex;flex-direction:column;
+  box-shadow:inset 4px 0 20px rgba(0,0,0,0.03);}
+.out-bar{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;
+  border-bottom:1px solid var(--border);font-size:.64rem;color:var(--ink-dm);
+  background:var(--gutter2);}
+.od{width:11px;height:11px;border-radius:50%;cursor:default;}
+.od.r{background:#FF5F57;box-shadow:0 0 0 1px rgba(0,0,0,0.08);}
+.od.y{background:#FEBC2E;box-shadow:0 0 0 1px rgba(0,0,0,0.08);}
+.od.g{background:#28C840;box-shadow:0 0 0 1px rgba(0,0,0,0.08);}
+.out-bar-title{margin-left:auto;font-size:.63rem;color:var(--ink-dm);letter-spacing:.04em;}
+.out-body{flex:1;padding:1.6rem 1.3rem;display:flex;flex-direction:column;gap:.12rem;overflow-y:auto;}
+.out-ln{display:flex;gap:.65rem;align-items:baseline;font-size:.75rem;line-height:2;}
+.out-pr{color:var(--t-fn);flex-shrink:0;font-size:.68rem;}
+.out-txt{color:var(--ink-lt);}
+.out-txt.ok{color:var(--t-str)}
+.out-txt.hi{color:var(--ink);font-weight:600}
+.out-txt.dm{color:var(--ln)}
+.out-sep{height:1px;background:var(--border);margin:.8rem 0;}
+.out-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.6rem 0;}
+.os{background:var(--surface);border:1px solid var(--border);padding:.8rem 1rem;
+  transition:box-shadow .2s,border-color .2s;cursor:default;border-radius:1px;}
+.os:hover{border-color:var(--bord-blu);box-shadow:var(--sh-sm);}
+.os-n{font-size:1.5rem;font-weight:700;color:var(--ink);line-height:1;margin-bottom:.25rem;letter-spacing:-.03em;}
+.os-n em{font-style:normal;color:var(--blue);font-size:1.1rem;}
+.os-l{font-size:.57rem;color:var(--ln);letter-spacing:.12em;text-transform:uppercase;}
+
+/* ══ SECTION WRAPPER ══ */
+.sf{position:relative;z-index:1;background:var(--surface);border-bottom:1px solid var(--bord-md);}
+.sf.alt{background:var(--bg);}
+.sf-topbar{display:flex;align-items:center;gap:.7rem;padding:.72rem 4.8rem .72rem 4.2rem;
+  background:linear-gradient(to bottom,var(--gutter2),var(--gutter2));
+  border-bottom:1px solid var(--border);
+  position:sticky;top:46px;z-index:50;font-size:.64rem;color:var(--ink-dm);}
+.stb-tab{background:var(--surface);padding:.3rem .95rem;border:1px solid var(--bord-md);
+  border-bottom:2px solid var(--blue);display:flex;align-items:center;gap:.45rem;
+  font-size:.67rem;color:var(--ink);box-shadow:var(--sh-sm);}
+.sf-body{padding:3.2rem 4.8rem 4.2rem;}
+.sec-cmt{font-size:.82rem;color:var(--t-cmt);line-height:2.15;margin-bottom:2.5rem;}
+
+/* ══ ABOUT ══ */
+.about-cols{display:grid;grid-template-columns:1fr 1fr;gap:3rem;}
+.docstring{border-left:3px solid var(--t-str);padding:1.1rem 1.6rem;margin-bottom:1.6rem;
+  background:var(--str-lt);border-radius:0 3px 3px 0;
+  box-shadow:inset 0 0 0 1px rgba(68,162,62,0.1);}
+.ds-mark{color:var(--t-str);font-size:.82rem;}
+.ds-txt{color:var(--ink-lt);font-family:var(--sans);font-style:italic;font-size:.94rem;
+  line-height:1.88;display:block;margin:.25rem 0;}
+.obj-block{background:var(--surface);border:1px solid var(--border);padding:1.5rem 1.7rem;
+  font-size:.83rem;line-height:2.25;margin-bottom:1.4rem;
+  box-shadow:var(--sh-sm);border-radius:2px;
+  transition:border-color .2s,box-shadow .2s;}
+.obj-block:hover{border-color:var(--bord-blu);box-shadow:var(--sh-md);}
+
+/* ══ RESEARCH ══ */
+.r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
+  border:1px solid var(--border);box-shadow:var(--sh-sm);}
+.r-card{background:var(--surface);padding:2.2rem 1.9rem;position:relative;overflow:hidden;
+  transition:background .25s,box-shadow .25s;}
+.r-card:hover{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--bord-blu);}
+.r-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+  background:linear-gradient(90deg,var(--blue),#7aafff);
+  transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1);}
+.r-card:hover::before{transform:scaleX(1);}
+.rc-num{font-size:.68rem;line-height:2;color:var(--t-cmt);margin-bottom:.4rem;letter-spacing:.05em;}
+.rc-ico{width:38px;height:38px;margin-bottom:1.1rem;
+  padding:7px;background:var(--blue-lt);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;}
+.rc-ico svg{width:24px;height:24px;}
+.rc-title{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.7rem;line-height:1.3;}
+.rc-desc{font-size:.8rem;line-height:1.88;color:var(--ink-lt);font-family:var(--sans);margin-bottom:1.2rem;}
+.rc-tag{display:inline-flex;align-items:center;gap:.35rem;font-size:.63rem;color:var(--t-fn);
+  border:1px solid rgba(59,118,240,0.22);padding:.22rem .65rem;
+  background:var(--blue-lt);border-radius:2px;letter-spacing:.02em;}
+
+/* ══ SKILLS ══ */
+.sk-cols{display:grid;grid-template-columns:1fr 1fr;gap:4rem;}
+.sk-hdr{font-size:.68rem;color:var(--t-cmt);padding-bottom:.75rem;
+  border-bottom:1px dashed var(--bord-md);margin-bottom:1.8rem;
+  display:flex;align-items:center;gap:.5rem;letter-spacing:.03em;}
+.sk-hdr .th{color:var(--t-kw);font-weight:700;}
+.sk-row{margin-bottom:1.45rem;}
+.sk-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.45rem;}
+.sk-name{font-size:.81rem;color:var(--t-var);font-weight:500;}
+.sk-pct{font-size:.68rem;color:var(--t-num);font-weight:600;}
+.sk-track{height:3px;background:var(--gutter2);border-radius:2px;overflow:visible;position:relative;}
+.sk-fill{height:100%;background:linear-gradient(90deg,var(--t-fn),#7aafff);
+  transform:scaleX(0);transform-origin:left;transition:transform 1.4s cubic-bezier(.16,1,.3,1);
+  border-radius:2px;position:relative;}
+.sk-fill::after{content:'';position:absolute;right:-2px;top:50%;transform:translateY(-50%);
+  width:7px;height:7px;background:var(--blue);border:2px solid var(--surface);border-radius:50%;
+  opacity:0;transition:opacity .4s 1s;box-shadow:0 0 6px rgba(59,118,240,0.5);}
+.sk-fill.go::after{opacity:1;}
+.sk-fill.go{transform:scaleX(1);}
+.tag-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2.4rem;}
+.ctag{font-size:.66rem;color:var(--t-op);border:1px solid rgba(1,120,179,0.18);padding:.23rem .7rem;
+  background:rgba(1,120,179,0.04);transition:all .18s;cursor:default;border-radius:2px;letter-spacing:.02em;}
+.ctag:hover{background:rgba(1,120,179,0.1);border-color:rgba(1,120,179,0.4);color:var(--t-op);}
+
+/* ══ EXPERIENCE ══ */
+.exp-wrap{display:flex;flex-direction:column;box-shadow:var(--sh-sm);}
+.exp-blk{border:1px solid var(--border);border-top:none;background:var(--surface);
+  transition:background .2s;}
+.exp-blk:first-child{border-top:1px solid var(--border);}
+.exp-blk:hover{background:var(--surface2);}
+.exp-hdr{padding:1.2rem 1.8rem;cursor:pointer;display:grid;grid-template-columns:1fr auto;
+  gap:1rem;align-items:center;border-bottom:1px solid transparent;transition:border-color .2s;
+  user-select:none;}
+.exp-blk.open{border-color:var(--bord-blu) !important;}
+.exp-blk.open>.exp-hdr{border-bottom-color:var(--border);background:var(--blue-lt);}
+.eb-sig{font-size:.82rem;line-height:1.9;}
+.eb-yr{font-size:.68rem;color:var(--t-num);font-weight:600;white-space:nowrap;}
+.exp-chevron{font-size:.6rem;color:var(--ink-dm);transition:transform .3s;}
+.exp-blk.open .exp-chevron{transform:rotate(90deg);color:var(--blue);}
+.exp-body{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.16,1,.3,1),padding .3s;}
+.exp-blk.open .exp-body{max-height:400px;padding:1.6rem 1.8rem 1.8rem;}
+.eb-desc{font-family:var(--sans);font-size:.88rem;line-height:1.95;color:var(--ink-lt);}
+.ci{font-family:var(--mono);font-size:.75rem;background:var(--gutter);padding:.1rem .45rem;
+  color:var(--t-fn);border:1px solid var(--border);border-radius:2px;}
+
+/* ══ PUBLICATIONS ══ */
+.pub-arr-lbl{font-size:.83rem;margin-bottom:.6rem;}
+.pub-item{display:flex;margin-bottom:1px;}
+.pub-ln{width:52px;flex-shrink:0;background:var(--gutter);border:1px solid var(--border);
+  border-right:none;display:flex;align-items:center;justify-content:center;
+  font-size:.62rem;color:var(--ln);transition:background .18s;}
+.pub-body{flex:1;padding:1.2rem 1.5rem;border:1px solid var(--border);background:var(--surface);
+  transition:background .18s,border-color .18s;display:grid;grid-template-columns:1fr auto;
+  gap:.9rem;align-items:center;}
+.pub-item:hover .pub-body{background:var(--surface2);border-color:var(--bord-blu);}
+.pub-item:hover .pub-ln{background:var(--blue-lt);}
+.pub-t{font-size:.83rem;font-weight:600;color:var(--ink);margin-bottom:.3rem;line-height:1.5;}
+.pub-v{font-size:.73rem;color:var(--t-cmt);}
+.pub-v em{font-style:normal;color:var(--t-fn);}
+.pub-bdg{font-size:.59rem;padding:.24rem .65rem;white-space:nowrap;border:1px solid;
+  letter-spacing:.07em;border-radius:2px;}
+.bdg-j{color:var(--t-kw);border-color:rgba(155,30,168,.22);background:rgba(155,30,168,.05);}
+.bdg-c{color:var(--t-fn);border-color:rgba(59,118,240,.22);background:rgba(59,118,240,.05);}
+
+/* ══ PROJECTS ══ */
+.prj-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.prj-card{border:1px solid var(--border);background:var(--surface);overflow:hidden;
+  transition:border-color .25s,box-shadow .25s;border-radius:2px;}
+.prj-card:hover{border-color:rgba(59,118,240,.28);box-shadow:var(--sh-md);}
+.prj-hdr{padding:.7rem 1.2rem;background:var(--gutter2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;}
+.ph-l{display:flex;align-items:center;gap:.6rem;font-size:.67rem;color:var(--ink-dm);}
+.ph-ico{width:28px;height:28px;background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ph-ico svg{width:18px;height:18px;stroke:var(--ink-lt);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.prj-status{font-size:.6rem;color:var(--t-str);background:rgba(68,162,62,.08);
+  border:1px solid rgba(68,162,62,.22);padding:.18rem .55rem;
+  display:flex;align-items:center;gap:.45rem;border-radius:2px;font-weight:600;}
+.prj-status::before{content:'';width:5px;height:5px;background:var(--t-str);
+  border-radius:50%;animation:sp 2s infinite;}
+@keyframes sp{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(68,162,62,.4)}
+  50%{opacity:.6;box-shadow:0 0 0 4px rgba(68,162,62,0)}}
+.prj-body{padding:1.5rem 1.6rem;}
+.prj-const{font-size:.74rem;line-height:2;margin-bottom:.28rem;}
+.prj-title{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.7rem;}
+.prj-desc{font-family:var(--sans);font-size:.83rem;line-height:1.88;color:var(--ink-lt);margin-bottom:1.2rem;}
+.prj-stack{display:flex;flex-wrap:wrap;gap:.42rem;}
+.prj-stack span{font-size:.63rem;color:var(--t-op);border:1px solid rgba(1,120,179,.18);
+  padding:.18rem .56rem;background:rgba(1,120,179,.04);border-radius:2px;letter-spacing:.02em;}
+
+/* ══ CONTACT — full light ══ */
+#contact{background:var(--surface);}
+.ct-cols{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;}
+.ct-obj{font-size:.83rem;line-height:2.45;}
+.ct-ln{display:flex;gap:.2em;align-items:baseline;flex-wrap:wrap;}
+.ct-obj a{text-decoration:none;transition:opacity .2s;}
+.ct-obj a:hover{opacity:.75;}
+.ct-obj a:hover .str{text-decoration:underline;text-decoration-color:var(--t-str);}
+.form-box{border:1px solid var(--border);background:var(--bg);overflow:hidden;
+  border-radius:2px;box-shadow:var(--sh-sm);}
+.fb-top{background:var(--gutter2);border-bottom:1px solid var(--border);
+  padding:.65rem 1.2rem;display:flex;align-items:center;gap:.5rem;font-size:.66rem;color:var(--ink-dm);}
+.fb-body{padding:1.6rem;display:flex;flex-direction:column;gap:1rem;}
+.fl-lbl{font-size:.65rem;color:var(--t-cmt);margin-bottom:.3rem;display:block;}
+.fi,.ft{width:100%;background:var(--surface);border:1px solid var(--border);
+  color:var(--ink);font-family:var(--mono);font-size:.81rem;padding:.7rem 1rem;
+  outline:none;resize:none;transition:border-color .2s,box-shadow .2s;border-radius:1px;}
+.fi:focus,.ft:focus{border-color:var(--blue);box-shadow:var(--sh-blu);}
+.fi::placeholder,.ft::placeholder{color:var(--ln);}
+.ft{height:110px;}
+.fb-submit{font-family:var(--mono);font-size:.74rem;font-weight:600;letter-spacing:.05em;
+  color:var(--surface);background:var(--blue);border:none;padding:.8rem 1.6rem;
+  cursor:pointer;display:flex;align-items:center;gap:.6rem;
+  transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%);
+  align-self:flex-start;
+  box-shadow:0 2px 12px rgba(59,118,240,0.28);}
+.fb-submit:hover{background:#2962d8;box-shadow:0 4px 20px rgba(59,118,240,0.4);}
+.fb-submit svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* ══ FOOTER ══ */
+footer{background:var(--gutter2);border-top:1px solid var(--bord-md);
+  padding:1.1rem 4.8rem;display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:1;}
+.ft-l{font-size:.7rem;color:var(--ink-dm);}
+.ft-r{font-size:.64rem;color:var(--ln);}
+
+/* ══ REVEAL ══ */
+.reveal{opacity:0;transform:translateY(18px);
+  transition:opacity .75s,transform .75s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.1s}.d2{transition-delay:.18s}
+.d3{transition-delay:.26s}.d4{transition-delay:.34s}
+
+/* ══ TYPEWRITER — hero lines appear sequentially ══ */
+.code-line.tw{opacity:0;animation:tw-in .12s ease forwards;}
+@keyframes tw-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ ACTIVE LINE GLOW — cycles in hero ══ */
+.ln.glow{color:var(--blue);font-weight:700;
+  text-shadow:0 0 8px rgba(59,118,240,0.5);}
+.code-line.active-hl{
+  background:linear-gradient(90deg,rgba(59,118,240,0.06),transparent 80%);
+  border-left:2px solid var(--blue);
+  margin-left:-2px;}
+
+/* ══ VS CODE STATUS BAR ══ */
+#statusbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  height:24px;background:var(--blue);
+  display:flex;align-items:center;padding:0 1rem;gap:1.5rem;
+  font-size:.62rem;color:rgba(255,255,255,0.85);letter-spacing:.04em;
+  font-family:var(--mono);
+  box-shadow:0 -1px 0 rgba(0,0,0,0.15);}
+.sb-item{display:flex;align-items:center;gap:.35rem;opacity:.85;transition:opacity .15s;cursor:default;}
+.sb-item:hover{opacity:1;}
+.sb-item svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;}
+.sb-right{margin-left:auto;display:flex;align-items:center;gap:1.5rem;}
+.sb-branch::before{content:'⎇  ';font-size:.58rem;opacity:.7;}
+.sb-live{display:flex;align-items:center;gap:.4rem;}
+.sb-live::before{content:'';width:6px;height:6px;background:#28C840;border-radius:50%;
+  animation:pulse-g 2.5s infinite;}
+@keyframes pulse-g{0%,100%{box-shadow:0 0 0 0 rgba(40,200,64,0.5)}50%{box-shadow:0 0 0 5px rgba(40,200,64,0)}}
+
+/* ══ RESEARCH CARD — per-domain icon colors ══ */
+.rc-ico.c1{background:rgba(59,118,240,0.1);}
+.rc-ico.c2{background:rgba(155,30,168,0.08);}
+.rc-ico.c3{background:rgba(68,162,62,0.1);}
+.rc-ico.c4{background:rgba(185,122,0,0.09);}
+.rc-ico.c5{background:rgba(1,120,179,0.1);}
+.rc-ico.c6{background:rgba(217,74,62,0.08);}
+
+/* ══ PUBLICATION — left accent on hover ══ */
+.pub-item{position:relative;transition:transform .2s;}
+.pub-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--blue);transform:scaleY(0);transform-origin:bottom;
+  transition:transform .25s cubic-bezier(.16,1,.3,1);z-index:2;}
+.pub-item:hover::before{transform:scaleY(1);}
+.pub-item:hover{transform:translateX(2px);}
+
+/* ══ EXP BLOCK — chevron indicator ══ */
+.exp-blk::after{content:'›';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);
+  font-size:1.1rem;color:var(--ink-dm);transition:transform .3s,color .2s;}
+.exp-blk{position:relative;}
+.exp-blk.open::after{transform:translateY(-50%) rotate(90deg);color:var(--blue);}
+
+/* ══ SKILL — percentage tick marks ══ */
+.sk-track{position:relative;}
+.sk-track::after{content:'';position:absolute;right:0;top:-3px;height:9px;width:1px;
+  background:var(--ln);}
+.sk-track::before{content:'';position:absolute;left:50%;top:-2px;height:6px;width:1px;
+  background:var(--border);}
+
+/* ══ SECTION BREADCRUMB PATH ══ */
+.sf-path{font-size:.62rem;color:var(--ink-dm);margin-left:.5rem;opacity:.6;}
+.sf-path .sep{margin:0 .3rem;color:var(--ln);}
+
+/* ══ ABOUT — docstring hover ══ */
+.docstring{transition:border-color .2s,box-shadow .2s;}
+.docstring:hover{border-color:var(--t-str);box-shadow:0 2px 12px rgba(68,162,62,0.1);}
+
+/* ══ FOOTER — extra padding for statusbar ══ */
+footer{margin-bottom:24px;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  nav{height:auto;flex-wrap:wrap;}
+  .nav-tabs .tab:not(.active){display:none;}
+  .hero-split{grid-template-columns:1fr;}
+  .hero-right{display:none;}
+  .hero-left{padding:2rem 1.6rem 2.5rem;}
+  .sf-topbar{padding:.65rem 1.5rem;}
+  .sf-body{padding:2rem 1.6rem 2.8rem;}
+  .about-cols,.sk-cols,.ct-cols{grid-template-columns:1fr;gap:2rem;}
+  .r-grid{grid-template-columns:1fr;}
+  .prj-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:.5rem;padding:1rem 1.5rem;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-gt">&gt;</div>
+
+<!-- ══ NAV ══ -->
+<nav id="nav">
+  <div class="nav-brand">
+    <svg class="nb-icon" viewBox="0 0 18 18" fill="none">
+      <rect x=".5" y=".5" width="17" height="17" stroke="#4078F2" stroke-width="1"/>
+      <text x="9" y="13" font-family="Fira Code,monospace" font-size="8.5" font-weight="700" fill="#4078F2" text-anchor="middle">ir</text>
+    </svg>
+    <span class="nb-label">EXPLORER</span>
+  </div>
+  <div class="nav-tabs">
+    <a class="tab active" href="#hero"><div class="td py"></div>imandi_raju.py</a>
+    <a class="tab" href="#research"><div class="td ts"></div>research.ts</a>
+    <a class="tab" href="#experience"><div class="td py"></div>experience.py</a>
+    <a class="tab" href="#publications"><div class="td md"></div>publications.md</a>
+    <a class="tab" href="#projects"><div class="td yml"></div>projects.yml</a>
+    <a class="tab" href="#contact"><div class="td ts"></div>contact.ts</a>
+  </div>
+  <div class="nav-end">
+    <a class="nav-cta" href="#contact">./collaborate</a>
+  </div>
+</nav>
+
+
+<!-- ══ HERO ══ -->
+<section id="hero" style="padding-top:44px;background:var(--surface);border-bottom:1px solid var(--bord-md);">
+  <div class="hero-split">
+
+    <div class="hero-left">
+      <div class="hero-gutter" id="hero-gutter"></div>
+      <div style="padding-left:18px;" id="hero-lines">
+        <span class="code-line"><span class="cmt"># ──────────────────────────────────────────</span></span>
+        <span class="code-line"><span class="cmt"># imandi_raju.py  ·  SRM-AP, Amaravati · Dept. of CSE</span></span>
+        <span class="code-line"><span class="cmt"># Author: Dr. Imandi Raju  ·  v2026.1</span></span>
+        <span class="code-line"><span class="cmt"># ──────────────────────────────────────────</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line"><span class="kw">from</span> <span class="fn">akash_labs</span> <span class="kw">import</span> <span class="typ">AerialIntelligence</span></span>
+        <span class="code-line"><span class="kw">from</span> <span class="fn">SRM-AP.cse</span> <span class="kw">import</span> <span class="typ">Professor</span><span class="pun">,</span> <span class="typ">Researcher</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line"><span class="kw">class</span> <span class="fn">ImandiRaju</span><span class="pun">(</span><span class="typ">Professor</span><span class="pun">,</span> <span class="typ">Researcher</span><span class="pun">):</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line i1"><span class="str">"""</span></span>
+        <span class="code-line i1"><span class="str">Assistant Professor, Dept. of CSE — SRM-AP</span></span>
+        <span class="code-line i1"><span class="str">Founder &amp; CEO, Akash Labs · PhD: AI &amp; Robotics</span></span>
+        <span class="code-line i1"><span class="str">"""</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line i1"><span class="vr">name</span>        <span class="op">=</span> <span class="str">"Dr. Imandi Raju"</span></span>
+        <span class="code-line i1"><span class="vr">role</span>        <span class="op">=</span> <span class="str">"Assistant Professor, CSE"</span></span>
+        <span class="code-line i1"><span class="vr">institution</span> <span class="op">=</span> <span class="str">"SRM-AP"</span></span>
+        <span class="code-line i1"><span class="vr">Startup</span>     <span class="op">=</span> <span class="str">"Akash Labs"</span></span>
+        <span class="code-line i1"><span class="vr">phd_year</span>    <span class="op">=</span> <span class="num">2022</span></span>
+        <span class="code-line i1"><span class="vr">papers</span>      <span class="op">=</span> <span class="num">12</span>  <span class="cmt"># and counting</span></span>
+        <span class="code-line i1"><span class="vr">citations</span>   <span class="op">=</span> <span class="num">200</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line i1"><span class="vr">domains</span> <span class="op">=</span> <span class="pun">[</span></span>
+        <span class="code-line i2"><span class="str">"Autonomous UAV Navigation"</span><span class="pun">,</span></span>
+        <span class="code-line i2"><span class="str">"Aerial Computer Vision"</span><span class="pun">,</span></span>
+        <span class="code-line i2"><span class="str">"Swarm Intelligence"</span><span class="pun">,</span></span>
+        <span class="code-line i2"><span class="str">"Edge AI Inference"</span><span class="pun">,</span></span>
+        <span class="code-line i2"><span class="str">"3D Scene Reconstruction (NeRF)"</span><span class="pun">,</span></span>
+        <span class="code-line i1"><span class="pun">]</span></span>
+        <span class="code-line">&nbsp;</span>
+        <span class="code-line i1"><span class="kw">def</span> <span class="fn">vision</span><span class="pun">(</span><span class="vr">self</span><span class="pun">):</span></span>
+        <span class="code-line i2"><span class="kw">return</span> <span class="str">"Build machines that fly, see, and think."</span><span class="blink-cur"></span></span>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="out-bar">
+        <div class="od r"></div><div class="od y"></div><div class="od g"></div>
+        <span class="out-bar-title">OUTPUT · imandi_raju.py</span>
+      </div>
+      <div class="out-body">
+        <div class="out-ln"><span class="out-pr">$</span><span class="out-txt dm">python imandi_raju.py --run</span></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt">Initialising profile...</span></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt ok">✓  Institution: SRM-AP — CSE</span></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt ok">✓  Lab: Akash Labs (active)</span></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt ok">✓  Research mode: ENABLED</span></div>
+        <div class="out-sep"></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt hi">Profile metrics:</span></div>
+        <div class="out-stats">
+          <div class="os"><div class="os-n"><span class="count-num" data-t="12">0</span><em>+</em></div><div class="os-l">Papers</div></div>
+          <div class="os"><div class="os-n"><span class="count-num" data-t="200">0</span><em>+</em></div><div class="os-l">Citations</div></div>
+          <div class="os"><div class="os-n"><span class="count-num" data-t="8">0</span><em>+</em></div><div class="os-l">Projects</div></div>
+          <div class="os"><div class="os-n"><span class="count-num" data-t="5">0</span><em>+</em></div><div class="os-l">Yrs Res.</div></div>
+        </div>
+        <div class="out-sep"></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt">Loading domains...</span></div>
+        <div class="out-ln"><span class="out-pr">&nbsp;</span><span class="out-txt ok">✓  UAV Navigation (Deep RL)</span></div>
+        <div class="out-ln"><span class="out-pr">&nbsp;</span><span class="out-txt ok">✓  Aerial Computer Vision</span></div>
+        <div class="out-ln"><span class="out-pr">&nbsp;</span><span class="out-txt ok">✓  Swarm Intelligence</span></div>
+        <div class="out-ln"><span class="out-pr">&nbsp;</span><span class="out-txt ok">✓  Edge AI (Jetson / TPU)</span></div>
+        <div class="out-ln"><span class="out-pr">&nbsp;</span><span class="out-txt ok">✓  3D Reconstruction (NeRF)</span></div>
+        <div class="out-sep"></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt hi">vision() → "Build machines that fly, see, and think."</span></div>
+        <div class="out-ln"><span class="out-pr">&gt;</span><span class="out-txt dm">Exit code 0.<span class="blink-cur" style="margin-left:.3rem"></span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ ABOUT ══ -->
+<section id="about" class="sf">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td py"></div>about.py</div>
+    <span style="margin-left:.8rem"><span class="cmt">// def about() → dict</span></span>
+    <span class="sf-path">imandi_raju<span class="sep">/</span>about<span class="sep">/</span>profile</span>
+  </div>
+  <div class="sf-body">
+    <div class="sec-cmt reveal">
+      <span class="code-line"><span class="kw">def</span> <span class="fn">about</span><span class="pun">(</span><span class="vr">self</span><span class="pun">) -&gt; </span><span class="typ">dict</span><span class="pun">:</span></span>
+    </div>
+    <div class="about-cols">
+      <div class="reveal d1">
+        <div class="docstring">
+          <span class="ds-mark">"""</span>
+          <span class="ds-txt">Imandi Raju is an Assistant Professor in the Department of Computer Science &amp; Engineering, and the founder of Akash Labs — a research initiative built on one conviction: that intelligent machines will reshape how humanity understands the world from above.</span>
+          <span class="ds-txt">His path spans signal processing, deep learning, autonomous aerial systems, and multi-agent robotics — at the precise intersection of rigorous academic inquiry and real-world deployment.</span>
+          <span class="ds-mark">"""</span>
+        </div>
+        <div class="obj-block">
+          <span class="code-line"><span class="kw">return</span> <span class="pun">{</span></span>
+          <span class="code-line i1"><span class="vr">"role"</span><span class="pun">:</span> <span class="str">"Asst. Professor, CSE — SRM-AP"</span><span class="pun">,</span></span>
+          <span class="code-line i1"><span class="vr">"lab"</span><span class="pun">:</span> <span class="str">"Akash Labs (Founder & CEO)"</span><span class="pun">,</span></span>
+          <span class="code-line i1"><span class="vr">"phd"</span><span class="pun">:</span> <span class="str">"AI & Robotics, 2018–2022"</span><span class="pun">,</span></span>
+          <span class="code-line i1"><span class="vr">"email"</span><span class="pun">:</span> <span class="str">"imandiraju@university.ac.in"</span><span class="pun">,</span></span>
+          <span class="code-line i1"><span class="vr">"open_to"</span><span class="pun">:</span> <span class="pun">[</span><span class="str">"collab"</span><span class="pun">,</span> <span class="str">"PhD sup."</span><span class="pun">,</span> <span class="str">"speaking"</span><span class="pun">],</span></span>
+          <span class="code-line"><span class="pun">}</span></span>
+        </div>
+      </div>
+      <div class="reveal d2">
+        <div class="obj-block">
+          <span class="code-line"><span class="cmt"># Positions held</span></span>
+          <span class="code-line"><span class="vr">pos_1</span> <span class="op">=</span> <span class="str">"Asst. Prof, CSE"</span>  <span class="cmt"># 2022–now</span></span>
+          <span class="code-line"><span class="vr">pos_2</span> <span class="op">=</span> <span class="str">"CEO, Akash Labs"</span>  <span class="cmt"># 2020–now</span></span>
+          <span class="code-line"><span class="vr">pos_3</span> <span class="op">=</span> <span class="str">"PhD Scholar"</span>      <span class="cmt"># 2018–2022</span></span>
+        </div>
+        <div class="obj-block">
+          <span class="code-line"><span class="cmt"># Tech stack</span></span>
+          <span class="code-line"><span class="vr">lang</span>  <span class="op">=</span> <span class="pun">[</span><span class="str">"Python"</span><span class="pun">,</span> <span class="str">"C++"</span><span class="pun">,</span> <span class="str">"CUDA"</span><span class="pun">]</span></span>
+          <span class="code-line"><span class="vr">ml</span>    <span class="op">=</span> <span class="pun">[</span><span class="str">"PyTorch"</span><span class="pun">,</span> <span class="str">"TensorFlow"</span><span class="pun">]</span></span>
+          <span class="code-line"><span class="vr">robot</span> <span class="op">=</span> <span class="pun">[</span><span class="str">"ROS2"</span><span class="pun">,</span> <span class="str">"PX4"</span><span class="pun">,</span> <span class="str">"Gazebo"</span><span class="pun">]</span></span>
+          <span class="code-line"><span class="vr">edge</span>  <span class="op">=</span> <span class="pun">[</span><span class="str">"Jetson"</span><span class="pun">,</span> <span class="str">"ONNX"</span><span class="pun">,</span> <span class="str">"TPU"</span><span class="pun">]</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ RESEARCH ══ -->
+<section id="research" class="sf alt">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td ts"></div>research.ts</div>
+    <span style="margin-left:.8rem"><span class="cmt">// const researchPillars: ResearchPillar[]</span></span>
+    <span class="sf-path">imandi_raju<span class="sep">/</span>research<span class="sep">/</span>pillars</span>
+  </div>
+  <div class="sf-body">
+    <div class="sec-cmt reveal">
+      <span class="code-line"><span class="kw">const</span> <span class="fn">researchPillars</span><span class="pun">:</span> <span class="typ">ResearchPillar</span><span class="pun">[]</span> <span class="op">=</span> <span class="pun">[</span></span>
+    </div>
+    <div class="r-grid">
+
+      <div class="r-card reveal">
+        <div class="rc-num"><span class="cmt">/* R-01 */</span></div>
+        <div class="rc-ico c1"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="17" r="3.5" stroke="var(--t-fn)" stroke-width="1.4"/><path d="M17 13.5V8M17 20.5V26M13.5 17H8M20.5 17H26" stroke="var(--t-fn)" stroke-width="1.4"/><circle cx="9" cy="9" r="2" stroke="var(--ink-dm)" stroke-width="1.1"/><circle cx="25" cy="9" r="2" stroke="var(--ink-dm)" stroke-width="1.1"/><circle cx="9" cy="25" r="2" stroke="var(--ink-dm)" stroke-width="1.1"/><circle cx="25" cy="25" r="2" stroke="var(--ink-dm)" stroke-width="1.1"/></svg></div>
+        <div class="rc-title">Autonomous UAV Navigation</div>
+        <div class="rc-desc">Self-navigating aerial vehicles using reinforcement learning and sensor fusion in GPS-denied environments. Zero external infrastructure dependency.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"Deep RL · Sensor Fusion"</span></span>
+      </div>
+
+      <div class="r-card reveal d1">
+        <div class="rc-num"><span class="cmt">/* R-02 */</span></div>
+        <div class="rc-ico c2"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="17" r="8" stroke="var(--t-kw)" stroke-width="1.4"/><circle cx="17" cy="17" r="3" stroke="var(--t-kw)" stroke-width="1.3"/><path d="M3 17h6M25 17h6M17 3v6M17 25v6" stroke="var(--ink-dm)" stroke-width="1.1"/></svg></div>
+        <div class="rc-title">Aerial Computer Vision</div>
+        <div class="rc-desc">Real-time object detection via custom YOLOv8 variants on edge-constrained drone hardware at 60fps with sub-10ms latency.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"YOLOv8 · Edge Inference"</span></span>
+      </div>
+
+      <div class="r-card reveal d2">
+        <div class="rc-num"><span class="cmt">/* R-03 */</span></div>
+        <div class="rc-ico c3"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="9" r="3" stroke="var(--t-str)" stroke-width="1.4"/><circle cx="7" cy="25" r="3" stroke="var(--t-str)" stroke-width="1.4"/><circle cx="27" cy="25" r="3" stroke="var(--t-str)" stroke-width="1.4"/><path d="M17 12L7 22M17 12L27 22M7 28L27 28" stroke="var(--ink-dm)" stroke-width="1.1" stroke-dasharray="2 2"/></svg></div>
+        <div class="rc-title">Swarm Intelligence</div>
+        <div class="rc-desc">Decentralised coordination protocols for multi-UAV swarms. Emergent collective behaviour without central control — inspired by biological systems.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"Multi-Agent · Decentralised"</span></span>
+      </div>
+
+      <div class="r-card reveal">
+        <div class="rc-num"><span class="cmt">/* R-04 */</span></div>
+        <div class="rc-ico c4"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="12" width="22" height="14" rx="1" stroke="var(--t-type)" stroke-width="1.4"/><path d="M12 12V8M22 12V8M17 12V6" stroke="var(--ink-dm)" stroke-width="1.2"/><path d="M10 20h5M19 20h5M10 25h14" stroke="var(--ink-dm)" stroke-width="1.1"/></svg></div>
+        <div class="rc-title">Edge AI Inference</div>
+        <div class="rc-desc">Deploying large neural networks on power-constrained hardware through quantization, structured pruning, and Neural Architecture Search.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"Jetson · TPU · ONNX"</span></span>
+      </div>
+
+      <div class="r-card reveal d1">
+        <div class="rc-num"><span class="cmt">/* R-05 */</span></div>
+        <div class="rc-ico c5"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="17" cy="22" rx="12" ry="8" stroke="var(--t-op)" stroke-width="1.4"/><path d="M5 22L17 8L29 22" stroke="var(--t-op)" stroke-width="1.4"/><circle cx="17" cy="22" r="2.5" stroke="var(--ink-dm)" stroke-width="1.2"/><path d="M11 22h12M17 16v12" stroke="var(--ink-dm)" stroke-width="1" stroke-dasharray="1.5 2"/></svg></div>
+        <div class="rc-title">3D Scene Reconstruction</div>
+        <div class="rc-desc">Aerial photogrammetry and Neural Radiance Fields (NeRF) for precision agriculture, infrastructure inspection, and digital twin generation.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"NeRF · Photogrammetry"</span></span>
+      </div>
+
+      <div class="r-card reveal d2">
+        <div class="rc-num"><span class="cmt">/* R-06 */</span></div>
+        <div class="rc-ico c6"><svg viewBox="0 0 34 34" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="12" r="4" stroke="var(--t-var)" stroke-width="1.4"/><path d="M17 16v5M10 29Q17 23 24 29" stroke="var(--t-var)" stroke-width="1.4"/><path d="M6 20Q10 12 17 11M28 20Q24 12 17 11" stroke="var(--ink-dm)" stroke-width="1" stroke-dasharray="2 2"/></svg></div>
+        <div class="rc-title">Human–Robot Interaction</div>
+        <div class="rc-desc">Gesture-based and voice-commanded interfaces for drone control, designed to reduce cognitive load in complex field operations.</div>
+        <span class="rc-tag"><span class="kw">tag</span><span class="op">:</span> <span class="str">"HRI · Multimodal"</span></span>
+      </div>
+
+    </div>
+    <div class="reveal" style="margin-top:.8rem;font-size:.8rem;"><span class="pun">]; </span><span class="cmt">// end researchPillars</span></div>
+  </div>
+</section>
+
+
+<!-- ══ SKILLS ══ -->
+<section id="skills" class="sf">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td py"></div>skills.py</div>
+    <span style="margin-left:.8rem"><span class="cmt">// proficiency: Dict[str, int]</span></span>
+  </div>
+  <div class="sf-body">
+    <div class="sk-cols">
+      <div class="reveal">
+        <div class="sk-hdr"><span class="th">#</span> core_proficiency</div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">deep_learning</span><span class="sk-pct">98</span></div><div class="sk-track"><div class="sk-fill" data-w=".98"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">computer_vision</span><span class="sk-pct">96</span></div><div class="sk-track"><div class="sk-fill" data-w=".96"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">python_pytorch_cuda</span><span class="sk-pct">98</span></div><div class="sk-track"><div class="sk-fill" data-w=".98"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">uav_systems_ros2</span><span class="sk-pct">88</span></div><div class="sk-track"><div class="sk-fill" data-w=".88"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">reinforcement_learning</span><span class="sk-pct">85</span></div><div class="sk-track"><div class="sk-fill" data-w=".85"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">edge_ai_jetson_tpu</span><span class="sk-pct">82</span></div><div class="sk-track"><div class="sk-fill" data-w=".82"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">nerf_3d_reconstruction</span><span class="sk-pct">80</span></div><div class="sk-track"><div class="sk-fill" data-w=".80"></div></div></div>
+        <div class="sk-row"><div class="sk-top"><span class="sk-name">cpp_embedded_systems</span><span class="sk-pct">72</span></div><div class="sk-track"><div class="sk-fill" data-w=".72"></div></div></div>
+      </div>
+      <div class="reveal d2">
+        <div class="sk-hdr"><span class="th">#</span> tools: string[]</div>
+        <div class="tag-row">
+          <span class="ctag">PyTorch</span><span class="ctag">TensorFlow</span><span class="ctag">ROS2</span>
+          <span class="ctag">CUDA</span><span class="ctag">OpenCV</span><span class="ctag">YOLOv8</span>
+          <span class="ctag">ONNX</span><span class="ctag">Jetson Nano</span><span class="ctag">Coral TPU</span>
+          <span class="ctag">NeRF Studio</span><span class="ctag">Open3D</span><span class="ctag">PX4</span>
+          <span class="ctag">Gazebo</span><span class="ctag">Docker</span><span class="ctag">AWS</span>
+          <span class="ctag">Isaac Sim</span><span class="ctag">MATLAB</span><span class="ctag">LaTeX</span>
+        </div>
+        <div class="sk-hdr" style="margin-top:2rem"><span class="th">#</span> teaching: Course[]</div>
+        <div class="tag-row">
+          <span class="ctag">Machine Learning</span><span class="ctag">Algorithms &amp; DS</span>
+          <span class="ctag">Advanced CV</span><span class="ctag">Robotics Elective</span>
+          <span class="ctag">B.Tech Thesis</span><span class="ctag">M.Tech Projects</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ EXPERIENCE ══ -->
+<section id="experience" class="sf alt">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td py"></div>experience.py</div>
+    <span style="margin-left:.8rem"><span class="cmt">// click to expand each function block</span></span>
+  </div>
+  <div class="sf-body">
+    <div class="sec-cmt reveal"><span class="code-line"><span class="cmt"># Expand each position below</span></span></div>
+    <div class="exp-wrap reveal d1">
+
+      <div class="exp-blk open" onclick="tog(this)">
+        <div class="exp-hdr">
+          <div class="eb-sig"><span class="kw">def</span> <span class="fn">assistant_professor</span><span class="pun">(</span><span class="vr">dept</span><span class="op">=</span><span class="str">"CSE"</span><span class="pun">,</span> <span class="vr">inst</span><span class="op">=</span><span class="str">"SRM-AP"</span><span class="pun">):</span></div>
+          <div style="display:flex;align-items:center;gap:1rem">
+            <div class="eb-yr">2022 – <span class="str">present</span></div>
+          </div>
+        </div>
+        <div class="exp-body">
+          <div class="eb-desc">
+            Teaching core CSE courses while running an active research lab in aerial intelligence. Mentoring <span class="ci">B.Tech</span> and <span class="ci">M.Tech</span> students on AI/UAV thesis projects. Leading funded research in autonomous systems and edge AI deployment.<br><br>
+            Courses: Machine Learning, Advanced Computer Vision, Robotics Elective.
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-blk" onclick="tog(this)">
+        <div class="exp-hdr">
+          <div class="eb-sig"><span class="kw">def</span> <span class="fn">founder_ceo</span><span class="pun">(</span><span class="vr">company</span><span class="op">=</span><span class="str">"Akash Labs"</span><span class="pun">):</span></div>
+          <div class="eb-yr">2020 – <span class="str">present</span></div>
+        </div>
+        <div class="exp-body">
+          <div class="eb-desc">
+            Founded Akash Labs to bridge academic research and applied drone technology. Built a multidisciplinary team developing commercial-grade autonomous UAV solutions for agriculture, infrastructure, and surveillance.<br><br>
+            Core stack: <span class="ci">ROS2</span> <span class="ci">PX4</span> <span class="ci">PyTorch</span> <span class="ci">Jetson</span> <span class="ci">ONNX</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="exp-blk" onclick="tog(this)">
+        <div class="exp-hdr">
+          <div class="eb-sig"><span class="kw">def</span> <span class="fn">phd_researcher</span><span class="pun">(</span><span class="vr">field</span><span class="op">=</span><span class="str">"AI &amp; Robotics"</span><span class="pun">):</span></div>
+          <div class="eb-yr">2018 – 2022</div>
+        </div>
+        <div class="exp-body">
+          <div class="eb-desc">
+            Doctoral research on autonomous UAV navigation using deep reinforcement learning in GPS-denied environments. Developed foundational work in swarm coordination and real-time aerial vision that now powers Akash Labs' core technology stack.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ PUBLICATIONS ══ -->
+<section id="publications" class="sf">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td md"></div>publications.md</div>
+    <span style="margin-left:.8rem"><span class="cmt">// const publications: Publication[]</span></span>
+  </div>
+  <div class="sf-body reveal">
+    <div class="pub-arr-lbl"><span class="kw">const</span> <span class="fn">publications</span> <span class="op">=</span> <span class="pun">[</span></div>
+
+    <div class="pub-item"><div class="pub-ln">01</div><div class="pub-body"><div><div class="pub-t">Deep Reinforcement Learning for GPS-Denied UAV Navigation in Complex Environments</div><div class="pub-v">Imandi Raju, et al. · <em>IEEE Trans. on Robotics, 2023</em></div></div><span class="pub-bdg bdg-j">Journal</span></div></div>
+    <div class="pub-item"><div class="pub-ln">02</div><div class="pub-body"><div><div class="pub-t">YOLOv8-Aero: Real-time Aerial Object Detection at 60fps on Edge Hardware</div><div class="pub-v">Imandi Raju, et al. · <em>CVPR Workshop on Embedded Vision, 2023</em></div></div><span class="pub-bdg bdg-c">Conference</span></div></div>
+    <div class="pub-item"><div class="pub-ln">03</div><div class="pub-body"><div><div class="pub-t">Decentralised Swarm Coordination Protocols for Multi-UAV Systems</div><div class="pub-v">Imandi Raju, et al. · <em>IEEE IROS, 2022</em></div></div><span class="pub-bdg bdg-c">Conference</span></div></div>
+    <div class="pub-item"><div class="pub-ln">04</div><div class="pub-body"><div><div class="pub-t">NeRF-UAV: Aerial Neural Radiance Fields for Precision Agriculture</div><div class="pub-v">Imandi Raju, et al. · <em>IEEE Robotics and Automation Letters, 2022</em></div></div><span class="pub-bdg bdg-j">Journal</span></div></div>
+    <div class="pub-item"><div class="pub-ln">05</div><div class="pub-body"><div><div class="pub-t">Gesture-Based Drone Control: Reducing Cognitive Load in Field Operations</div><div class="pub-v">Imandi Raju, et al. · <em>ACM CHI, 2021</em></div></div><span class="pub-bdg bdg-c">Conference</span></div></div>
+    <div class="pub-item" style="opacity:.45"><div class="pub-ln">…</div><div class="pub-body"><div><div class="pub-t" style="color:var(--ink-lt)">+ 7 more across IEEE, ACM, Springer — 200+ total citations</div><div class="pub-v"><em>Google Scholar — Imandi Raju</em></div></div><span class="pub-bdg bdg-j" style="opacity:.5">Mixed</span></div></div>
+
+    <div style="font-size:.82rem;margin-top:.5rem;"><span class="pun">]; </span><span class="cmt">// end publications</span></div>
+  </div>
+</section>
+
+
+<!-- ══ PROJECTS ══ -->
+<section id="projects" class="sf alt">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td yml"></div>projects.yml</div>
+    <span style="margin-left:.8rem"><span class="cmt">// status: running | paused | shipped</span></span>
+  </div>
+  <div class="sf-body">
+    <div class="prj-grid">
+
+      <div class="prj-card reveal">
+        <div class="prj-hdr">
+          <div class="ph-l">
+            <div class="ph-ico"><svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="3" stroke-width="1.3"/><path d="M13 10V6M13 16v4M10 13H6M16 13h4" stroke-width="1.3"/><circle cx="7" cy="7" r="1.6" stroke-width="1.1"/><circle cx="19" cy="7" r="1.6" stroke-width="1.1"/><circle cx="7" cy="19" r="1.6" stroke-width="1.1"/><circle cx="19" cy="19" r="1.6" stroke-width="1.1"/></svg></div>
+            project_akash.py
+          </div>
+          <span class="prj-status">running</span>
+        </div>
+        <div class="prj-body">
+          <div class="prj-const"><span class="kw">const</span> <span class="fn">name</span> <span class="op">=</span> <span class="str">"Autonomous Swarm Platform"</span></div>
+          <div class="prj-title">Project Akash</div>
+          <div class="prj-desc">Full-stack autonomous drone swarm capable of decentralised mission planning, obstacle avoidance, and target tracking in GPS-degraded real-world environments.</div>
+          <div class="prj-stack"><span>ROS2</span><span>PyTorch</span><span>PX4</span><span>CUDA</span><span>Gazebo</span></div>
+        </div>
+      </div>
+
+      <div class="prj-card reveal d1">
+        <div class="prj-hdr">
+          <div class="ph-l">
+            <div class="ph-ico"><svg viewBox="0 0 26 26"><ellipse cx="13" cy="18" rx="9" ry="6" stroke-width="1.3"/><path d="M4 18L13 6L22 18" stroke-width="1.3"/><circle cx="13" cy="18" r="2" stroke-width="1.2"/></svg></div>
+            aero_nerf.py
+          </div>
+          <span class="prj-status">running</span>
+        </div>
+        <div class="prj-body">
+          <div class="prj-const"><span class="kw">const</span> <span class="fn">name</span> <span class="op">=</span> <span class="str">"Infrastructure Digital Twin"</span></div>
+          <div class="prj-title">AeroNeRF</div>
+          <div class="prj-desc">Photorealistic 3D digital twins of bridges and power lines using drone imagery and Neural Radiance Fields for automated defect detection.</div>
+          <div class="prj-stack"><span>NeRF Studio</span><span>Open3D</span><span>Python</span><span>AWS</span></div>
+        </div>
+      </div>
+
+      <div class="prj-card reveal">
+        <div class="prj-hdr">
+          <div class="ph-l">
+            <div class="ph-ico"><svg viewBox="0 0 26 26"><rect x="5" y="10" width="16" height="11" rx="1" stroke-width="1.3"/><path d="M10 10V7M18 10V7M13 10V5" stroke-width="1.2"/><path d="M8 16h4M16 16h2M8 20h10" stroke-width="1.1"/></svg></div>
+            edge_vision.py
+          </div>
+          <span class="prj-status">running</span>
+        </div>
+        <div class="prj-body">
+          <div class="prj-const"><span class="kw">const</span> <span class="fn">name</span> <span class="op">=</span> <span class="str">"On-Device AI for Drones"</span></div>
+          <div class="prj-title">EdgeVision</div>
+          <div class="prj-desc">Model compression pipeline (quantization + pruning + NAS) enabling YOLOv8-class models on Jetson Nano at &lt;10W — full production accuracy.</div>
+          <div class="prj-stack"><span>ONNX</span><span>TensorRT</span><span>Jetson</span><span>Coral TPU</span></div>
+        </div>
+      </div>
+
+      <div class="prj-card reveal d1">
+        <div class="prj-hdr">
+          <div class="ph-l">
+            <div class="ph-ico"><svg viewBox="0 0 26 26"><circle cx="13" cy="9" r="3.5" stroke-width="1.3"/><path d="M13 12.5v5M8 23Q13 18 18 23" stroke-width="1.3"/><path d="M4 16Q7 10 13 9M22 16Q19 10 13 9" stroke-width="1" stroke-dasharray="1.5 1.5"/></svg></div>
+            hasta_bot.py
+          </div>
+          <span class="prj-status">running</span>
+        </div>
+        <div class="prj-body">
+          <div class="prj-const"><span class="kw">const</span> <span class="fn">name</span> <span class="op">=</span> <span class="str">"Gesture-Commanded UAV"</span></div>
+          <div class="prj-title">HastaBot</div>
+          <div class="prj-desc">Multimodal HRI interface — hand gestures + voice commands for drone control. 40% reduction in task error vs. traditional RC in field trials.</div>
+          <div class="prj-stack"><span>MediaPipe</span><span>Whisper</span><span>ROS</span><span>Arduino</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ CONTACT — full light mode ══ -->
+<section id="contact" class="sf">
+  <div class="sf-topbar">
+    <div class="stb-tab"><div class="td ts"></div>contact.ts</div>
+    <span style="margin-left:.8rem"><span class="cmt">// async function sendMessage(): Promise&lt;void&gt;</span></span>
+  </div>
+  <div class="sf-body">
+    <div class="ct-cols">
+      <div class="reveal">
+        <div class="sec-cmt" style="margin-bottom:1.6rem">
+          <span class="code-line"><span class="cmt">/**</span></span>
+          <span class="code-line"><span class="cmt"> * Research collaboration, PhD supervision,</span></span>
+          <span class="code-line"><span class="cmt"> * conference speaking, consulting.</span></span>
+          <span class="code-line"><span class="cmt"> * All enquiries welcome — open: true</span></span>
+          <span class="code-line"><span class="cmt"> */</span></span>
+        </div>
+        <div class="ct-obj">
+          <div class="ct-ln"><span class="kw">const</span>&nbsp;<span class="fn">contact</span>&nbsp;<span class="op">=</span>&nbsp;<span class="pun">{</span></div>
+          <div class="ct-ln" style="padding-left:1.5em"><span class="vr">email</span><span class="pun">:</span>&nbsp;<a href="mailto:imandiraju@university.ac.in"><span class="str">"imandiraju@university.ac.in"</span></a><span class="pun">,</span></div>
+          <div class="ct-ln" style="padding-left:1.5em"><span class="vr">scholar</span><span class="pun">:</span>&nbsp;<a href="#"><span class="str">"google.scholar/imandi-raju"</span></a><span class="pun">,</span></div>
+          <div class="ct-ln" style="padding-left:1.5em"><span class="vr">github</span><span class="pun">:</span>&nbsp;<a href="https://github.com/imandiRaju" target="_blank"><span class="str">"github.com/imandiRaju"</span></a><span class="pun">,</span></div>
+          <div class="ct-ln" style="padding-left:1.5em"><span class="vr">linkedin</span><span class="pun">:</span>&nbsp;<a href="https://linkedin.com/in/imandiRaju" target="_blank"><span class="str">"linkedin.com/in/imandiRaju"</span></a><span class="pun">,</span></div>
+          <div class="ct-ln" style="padding-left:1.5em"><span class="vr">lab</span><span class="pun">:</span>&nbsp;<a href="https://akashlabs.io" target="_blank"><span class="str">"akashlabs.io"</span></a><span class="pun">,</span></div>
+          <div class="ct-ln"><span class="pun">};</span></div>
+        </div>
+      </div>
+      <div class="reveal d2">
+        <div class="form-box">
+          <div class="fb-top">
+            <div class="od r"></div><div class="od y"></div><div class="od g"></div>
+            <span style="margin-left:.4rem">send_message.ts</span>
+          </div>
+          <div class="fb-body">
+            <div>
+              <label class="fl-lbl"><span class="kw">const</span> <span class="vr">sender_name</span><span class="op">:</span> <span class="typ">string</span> <span class="op">=</span></label>
+              <input type="text" class="fi" placeholder='"Dr. / Prof. / Name"'>
+            </div>
+            <div>
+              <label class="fl-lbl"><span class="kw">const</span> <span class="vr">sender_email</span><span class="op">:</span> <span class="typ">string</span> <span class="op">=</span></label>
+              <input type="email" class="fi" placeholder='"your@institution.ac.in"'>
+            </div>
+            <div>
+              <label class="fl-lbl"><span class="kw">const</span> <span class="vr">subject</span><span class="op">:</span> <span class="typ">string</span> <span class="op">=</span></label>
+              <input type="text" class="fi" placeholder='"Research collaboration…"'>
+            </div>
+            <div>
+              <label class="fl-lbl"><span class="kw">const</span> <span class="vr">message</span><span class="op">:</span> <span class="typ">string</span> <span class="op">=</span></label>
+              <textarea class="ft" placeholder='"I am writing regarding…"'></textarea>
+            </div>
+            <button class="fb-submit" id="send-btn">
+              <svg viewBox="0 0 12 12"><path d="M1 11L11 1M11 1H5M11 1V7"/></svg>
+              sendMessage()
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="ft-l"><span class="cmt"># EOF · imandi_raju.py</span> &nbsp;&nbsp; © 2025 Dr. Imandi Raju · SRM-AP, CSE · Akash Labs</div>
+  <div class="ft-r">Lines: 287 &nbsp;·&nbsp; UTF-8 &nbsp;·&nbsp; Python 3.11</div>
+</footer>
+
+
+<!-- ══ VS CODE STATUS BAR ══ -->
+<div id="statusbar">
+  <span class="sb-item sb-branch">main</span>
+  <span class="sb-item">
+    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5v3l2 1.5"/></svg>
+    Last modified: 2025
+  </span>
+  <span class="sb-item sb-live">imandi_raju.py — Active</span>
+  <div class="sb-right">
+    <span class="sb-item">Python 3.11</span>
+    <span class="sb-item">UTF-8</span>
+    <span class="sb-item" id="sb-ln-col">Ln 1, Col 1</span>
+    <span class="sb-item">
+      <svg viewBox="0 0 12 12"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
+      SRM-AP · CSE · Akash Labs
+    </span>
+  </div>
+</div>
+
+<script>
+/* ── BLINKING TEXT CURSOR ── */
+const cur = document.getElementById('cur');
+const curGt = document.getElementById('cur-gt');
+let px=0,py=0,mx=window.innerWidth/2,my=window.innerHeight/2;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function lag(){px+=(mx-px)*.08;py+=(my-py)*.08;curGt.style.left=px+'px';curGt.style.top=py+'px';requestAnimationFrame(lag);})();
+
+/* ── STATUS BAR Ln/Col ── */
+const sbLnCol = document.getElementById('sb-ln-col');
+document.addEventListener('mousemove', e => {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (el) {
+    const line = el.closest('.code-line');
+    if (line) {
+      const lines = [...document.querySelectorAll('.code-line')];
+      const ln = lines.indexOf(line) + 1;
+      sbLnCol.textContent = `Ln ${ln}, Col 1`;
+    }
+  }
+});
+
+/* ── HERO GUTTER LINE NUMS ── */
+(function(){
+  const g=document.getElementById('hero-gutter');
+  const count=document.querySelectorAll('#hero-lines .code-line').length+2;
+  for(let i=1;i<=count;i++){
+    const d=document.createElement('div');
+    d.className='ln';
+    d.textContent=String(i).padStart(2,' ');
+    g.appendChild(d);
+  }
+})();
+
+/* ── TYPEWRITER — hero code lines appear one by one ── */
+(function(){
+  const lines = document.querySelectorAll('#hero-lines .code-line');
+  lines.forEach((line, i) => {
+    line.style.opacity = '0';
+    setTimeout(() => {
+      line.style.opacity = '1';
+      line.classList.add('tw');
+    }, 300 + i * 55);
+  });
+})();
+
+/* ── ACTIVE LINE CYCLER ── */
+(function(){
+  const lines = document.querySelectorAll('#hero-lines .code-line');
+  const gutterLns = document.querySelectorAll('#hero-gutter .ln');
+  const important = [9, 17, 18, 21, 22, 26]; // highlight interesting lines
+  let idx = 0;
+  function cycle(){
+    lines.forEach((l,i) => {
+      l.classList.toggle('active-hl', i === important[idx]);
+    });
+    gutterLns.forEach((l,i) => {
+      l.classList.toggle('glow', i === important[idx]);
+    });
+    idx = (idx+1) % important.length;
+  }
+  cycle();
+  setInterval(cycle, 2200);
+})();
+
+/* ── ACTIVE FILE TAB ON SCROLL ── */
+const tabMap={'hero':'imandi_raju.py','about':'imandi_raju.py','research':'research.ts',
+  'skills':'skills.py','experience':'experience.py','publications':'publications.md',
+  'projects':'projects.yml','contact':'contact.ts'};
+const tabs=document.querySelectorAll('.tab');
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const f=tabMap[e.target.id]||'';
+      tabs.forEach(t=>{t.classList.toggle('active',t.textContent.trim()===f);});
+    }
+  });
+},{threshold:.3});
+['hero','about','research','skills','experience','publications','projects','contact']
+  .forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+
+/* ── REVEAL ── */
+const rv=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
+},{threshold:.07});
+document.querySelectorAll('.reveal').forEach(el=>rv.observe(el));
+
+/* ── COUNT UP (hero output) ── */
+const cv=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    e.target.querySelectorAll('.count-num').forEach(el=>{
+      const t=+el.dataset.t;let v=0,step=t/50;
+      const tm=setInterval(()=>{v+=step;if(v>=t){el.textContent=t;clearInterval(tm);}else el.textContent=Math.floor(v);},18);
+    });cv.unobserve(e.target);
+  });
+},{threshold:.3});
+const hr=document.querySelector('.hero-right');if(hr)cv.observe(hr);
+
+/* ── SKILL BARS ── */
+const sv=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    e.target.querySelectorAll('.sk-fill').forEach(b=>{b.style.transform=`scaleX(${b.dataset.w})`;b.classList.add('go');});
+    sv.unobserve(e.target);
+  });
+},{threshold:.1});
+const sk=document.getElementById('skills');if(sk)sv.observe(sk);
+
+/* ── EXP ACCORDION ── */
+function tog(el){
+  const open=el.classList.contains('open');
+  document.querySelectorAll('.exp-blk').forEach(b=>b.classList.remove('open'));
+  if(!open)el.classList.add('open');
+}
+
+/* ── SEND ── */
+document.getElementById('send-btn').addEventListener('click',function(){
+  this.textContent='✓ message_sent()';
+  this.style.background='var(--t-str)';this.disabled=true;
+});
+</script>
+</body>
+</html>
